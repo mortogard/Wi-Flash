@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "WI-FLASH PRO - Smart Flasher Controller",
+  "short_name": "Wi-Flash",
+  "description": "Smart automotive LED flasher controller PWA with 30 patterns, speed PWM tuning, and ESP-12F firmware integration.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07090e",
+  "theme_color": "#07090e",
+  "categories": ["utilities", "automotive"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

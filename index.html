@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>WI-FLASH PRO - Smart Flasher Controller</title>
+  <meta name="description" content="PWA Pengontrol Flasher Lampu Cerdas 30 Mode dengan ESP-12F GPIO 12 MOSFET." />
+  <meta name="theme-color" content="#07090e" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Wi-Flash" />
+
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: #0d121f;
+      --card-border: #1e293b;
+      --amber: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      background-image: 
+        linear-gradient(to right, rgba(30, 41, 59, 0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 580px;
+      min-height: 100vh;
+      background: rgba(8, 12, 21, 0.85);
+      border-left: 1px solid rgba(30, 41, 59, 0.5);
+      border-right: 1px solid rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.8);
+      background: rgba(9, 13, 22, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4);
+      display: flex; align-items: center; justify-content: center; color: var(--amber);
+    }
+    .brand-title { font-size: 1.15rem; font-weight: 800; font-family: 'Chakra Petch', sans-serif; }
+    .brand-badge { background: var(--amber); color: #000; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; font-weight: 800; }
+    .brand-sub { font-size: 0.72rem; color: var(--text-muted); }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .ip-badge {
+      display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 9999px;
+      border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: #34d399; cursor: pointer;
+    }
+    .ip-badge.offline { border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 10px; background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(51, 65, 85, 0.8); color: #cbd5e1; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    .hud-banner {
+      padding: 8px 16px; background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(30, 41, 59, 0.8);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; display: flex; align-items: center; justify-content: space-between;
+    }
+    .hud-banner.success { background: rgba(6, 78, 59, 0.4); border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; }
+
+    main { padding: 16px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between; padding: 10px 16px;
+      border-radius: 12px; background: rgba(12, 16, 28, 0.7); border: 1px solid rgba(30, 41, 59, 0.8); font-size: 0.75rem;
+    }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+
+    .btn-reset {
+      display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 8px;
+      border: 1px solid rgba(71, 85, 105, 0.8); background: rgba(30, 41, 59, 0.6); color: #94a3b8;
+      font-size: 0.7rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; cursor: pointer;
+    }
+
+    .card {
+      border-radius: 16px; border: 1px solid rgba(30, 41, 59, 0.9);
+      background: linear-gradient(180deg, rgba(16, 21, 36, 0.9) 0%, rgba(11, 15, 25, 0.95) 100%);
+      padding: 20px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    .card-profile { border-color: rgba(245, 158, 11, 0.3); }
+
+    .card-header { display: flex; align-items: center; justify-content: space-between; }
+    .card-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--amber); font-family: 'Chakra Petch', sans-serif; display: flex; align-items: center; gap: 6px; }
+
+    .profile-title { font-size: 1.45rem; font-weight: 800; margin-top: 10px; }
+    .profile-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+    .visualizer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; gap: 12px; margin-top: 24px; }
+    .channel-box-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .channel-box {
+      width: 72px; height: 72px; border-radius: 16px; background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(51, 65, 85, 0.6); display: flex; align-items: center; justify-content: center; color: #475569; transition: all 0.06s ease;
+    }
+    .channel-box.active { border-color: var(--amber); background: rgba(245, 158, 11, 0.2); color: #fef08a; box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); transform: scale(1.04); }
+
+    .eq-bars { display: flex; align-items: flex-end; gap: 4px; height: 48px; }
+    .eq-bar { width: 5px; border-radius: 9999px; background: #334155; }
+    .eq-bar.active { background: var(--amber); box-shadow: 0 0 8px rgba(245, 158, 11, 0.7); }
+
+    .speed-badge { padding: 4px 12px; border-radius: 9999px; border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.1); color: var(--amber); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; }
+    .slider-range { width: 100%; height: 10px; border-radius: 8px; background: #1e293b; appearance: none; outline: none; cursor: pointer; }
+    .slider-range::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--amber); cursor: pointer; border: 2px solid #000; box-shadow: 0 0 12px var(--amber); }
+
+    .preset-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .preset-btn { padding: 8px; border-radius: 10px; border: 1px solid rgba(51, 65, 85, 0.8); background: rgba(15, 23, 42, 0.6); color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+
+    .filter-bar { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .search-input { width: 100%; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(51, 65, 85, 0.8); background: rgba(15, 23, 42, 0.8); color: #fff; font-size: 0.75rem; outline: none; }
+    .category-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+    .cat-pill { padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(51, 65, 85, 0.8); background: rgba(15, 23, 42, 0.6); color: #94a3b8; font-size: 0.68rem; font-family: 'JetBrains Mono', monospace; cursor: pointer; white-space: nowrap; }
+    .cat-pill.active { background: var(--amber); color: #07090e; font-weight: 800; border-color: var(--amber); }
+
+    .pattern-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; max-height: 440px; overflow-y: auto; }
+    @media (min-width: 480px) { .pattern-grid { grid-template-columns: 1fr 1fr; } }
+
+    .mode-btn {
+      display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 12px;
+      border: 1px solid rgba(51, 65, 85, 0.7); background: rgba(13, 17, 29, 0.7); color: #fff; text-align: left; cursor: pointer;
+    }
+    .mode-btn.active { border-color: var(--amber); background: linear-gradient(90deg, rgba(245, 158, 11, 0.2) 0%, rgba(22, 28, 46, 0.9) 100%); }
+    .mode-id-badge { width: 32px; height: 32px; border-radius: 8px; background: rgba(30, 41, 59, 0.9); color: #94a3b8; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; }
+    .mode-btn.active .mode-id-badge { background: var(--amber); color: #07090e; }
+
+    footer { padding: 12px 18px; border-top: 1px solid rgba(30, 41, 59, 0.8); background: rgba(8, 11, 18, 0.95); display: flex; align-items: center; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+    .link-btn { color: #94a3b8; text-decoration: underline; cursor: pointer; background: none; border: none; font-size: inherit; font-family: inherit; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { width: 100%; max-width: 640px; max-height: 90vh; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.4); background: #0c101c; display: flex; flex-direction: column; overflow: hidden; }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid rgba(30, 41, 59, 0.8); background: #090d16; display: flex; align-items: center; justify-content: space-between; }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 0.78rem; }
+    pre code { display: block; padding: 14px; border-radius: 12px; background: #07090e; border: 1px solid rgba(30, 41, 59, 0.8); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #e2e8f0; overflow-x: auto; user-select: all; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand-wrap">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">WI-FLASH <span class="brand-badge">PRO</span></div>
+          <div class="brand-sub">Smart Flasher Controller PWA</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="ipBadge" class="ip-badge" title="Klik untuk membuka Pengaturan IP">
+          <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981;"></span>
+          <span id="ipText">192.168.4.1</span>
+        </button>
+
+        <button id="btnInstall" class="icon-btn" title="Pasang PWA ke Layar Utama" style="display: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+
+        <button id="btnOpenSettings" class="icon-btn" title="Pengaturan">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Transmission HUD Banner -->
+    <div id="hudBanner" class="hud-banner">
+      <span id="hudText">Memeriksa status ESP-12F di http://192.168.4.1/status...</span>
+      <button id="btnRefresh" style="background:none; border:none; color:inherit; cursor:pointer;" title="Muat Ulang">&#x21bb;</button>
+    </div>
+
+    <!-- Main Controller -->
+    <main>
+      <!-- Relay Status Bar -->
+      <div class="status-bar">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="status-dot"></div>
+          <span>MOSFET GPIO 12: <strong id="armedModeText" style="color:var(--amber);">ARMED (Mode #07)</strong></span>
+        </div>
+        <button id="btnResetFactory" class="btn-reset">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          RESET PABRIK
+        </button>
+      </div>
+
+      <!-- Current Profile Card -->
+      <div class="card card-profile">
+        <div class="card-header">
+          <div class="card-label">Current Profile</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div id="displayBadge" style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; padding:2px 10px; border-radius:9999px; background:rgba(30,41,59,0.8); border:1px solid rgba(51,65,85,0.8);">#07 <span style="color:#64748b;">/ 30</span></div>
+            <div id="indexBadge" style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); color:var(--amber); padding:2px 6px; border-radius:4px;">mode=6</div>
+          </div>
+        </div>
+
+        <div id="profileName" class="profile-title">Mazda Heartbeat Pulse</div>
+        <div id="profileDesc" class="profile-desc">Signature organic fading double-thump rhythm</div>
+
+        <!-- Realtime Dual Channel Visualizer -->
+        <div class="visualizer-grid">
+          <div class="channel-box-wrap">
+            <div id="chLeft" class="channel-box">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </div>
+            <span style="font-size:0.65rem; font-family:'JetBrains Mono',monospace; color:#94a3b8;">Left CH</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div class="eq-bars">
+              <div class="eq-bar" style="height:25%;"></div>
+              <div class="eq-bar" style="height:50%;"></div>
+              <div class="eq-bar" style="height:80%;"></div>
+              <div class="eq-bar" style="height:100%;"></div>
+              <div class="eq-bar" style="height:80%;"></div>
+              <div class="eq-bar" style="height:50%;"></div>
+              <div class="eq-bar" style="height:25%;"></div>
+            </div>
+            <span style="font-size:0.65rem; font-family:'JetBrains Mono',monospace; color:var(--amber); margin-top:10px;">Sync Realtime</span>
+          </div>
+
+          <div class="channel-box-wrap">
+            <div id="chRight" class="channel-box">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            <span style="font-size:0.65rem; font-family:'JetBrains Mono',monospace; color:#94a3b8;">Right CH</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Speed Slider Card -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="card-label">Kecepatan Kedipan</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Rentang Firmware: 4 (Cepat) &ndash; 30 (Lambat)</div>
+          </div>
+          <div id="speedBadge" class="speed-badge">14 STEP</div>
+        </div>
+
+        <div style="margin-top:24px;">
+          <input type="range" id="speedSlider" class="slider-range" min="4" max="30" step="1" value="14" />
+          <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:'JetBrains Mono',monospace; color:#64748b; margin-top:8px;">
+            <span>FAST (4)</span>
+            <span>MID (17)</span>
+            <span>SLOW (30)</span>
+          </div>
+        </div>
+
+        <div class="preset-grid">
+          <button class="preset-btn" onclick="applySpeed(6)">⚡ Fast (6)</button>
+          <button class="preset-btn" onclick="applySpeed(14)">★ Norm (14)</button>
+          <button class="preset-btn" onclick="applySpeed(24)">⏳ Slow (24)</button>
+        </div>
+      </div>
+
+      <!-- Pattern Library Card (30 Modes) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-label">Pattern Library (30 Modes)</div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--amber);">ALL PRESETS</span>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="searchInput" class="search-input" placeholder="Cari mode (Heartbeat, Strobe, F1, Audi, SOS)..." />
+          <div class="category-pills">
+            <button class="cat-pill active" onclick="filterCategory('ALL')">ALL</button>
+            <button class="cat-pill" onclick="filterCategory('OEM')">OEM</button>
+            <button class="cat-pill" onclick="filterCategory('Emergency')">Emergency</button>
+            <button class="cat-pill" onclick="filterCategory('Strobe')">Strobe</button>
+            <button class="cat-pill" onclick="filterCategory('Chase')">Chase</button>
+            <button class="cat-pill" onclick="filterCategory('Special')">Special</button>
+          </div>
+        </div>
+
+        <div id="patternGrid" class="pattern-grid"></div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
+        <span>ESP-12F (GPIO 12)</span>
+        <span style="color:#475569;">|</span>
+        <span style="color:var(--amber); font-weight:700;">12.4V</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="btnOpenFirmware" class="link-btn">C++ Sketch</button>
+        <span>FW: <span style="color:#cbd5e1;">v2.5-CORS</span></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-header">
+        <strong style="color:#fff;">Pengaturan Endpoint ESP-12F</strong>
+        <button onclick="closeModal('settingsModal')" class="link-btn" style="font-size:1.2rem;">&times;</button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+        <div>
+          <label style="display:block; margin-bottom:6px; font-weight:600;">Alamat IP Modul Flasher:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="targetIpInput" class="search-input" value="192.168.4.1" style="font-family:'JetBrains Mono',monospace;" />
+            <button onclick="testPing()" class="btn-reset" style="background:var(--amber); color:#07090e; border:none; font-weight:800;">Uji Ping</button>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+          <button onclick="closeModal('settingsModal')" class="btn-reset">Batal</button>
+          <button onclick="saveSettings()" class="btn-reset" style="background:var(--amber); color:#07090e; border:none; font-weight:800;">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firmware Modal -->
+  <div id="firmwareModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <strong style="color:#fff;">Firmware C++ ESP-12F (GPIO 12 MOSFET)</strong>
+        <button onclick="closeModal('firmwareModal')" class="link-btn" style="font-size:1.4rem;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <pre><code id="firmwareCodeDisplay"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PATTERNS = [
+      { id: 0, displayId: 1, name: "Standard Hazard Blink", subtitle: "Classic 50% duty cycle synchronized flasher", category: "OEM", defaultSpeed: 16, steps: [[1,1],[1,1],[0,0],[0,0]] },
+      { id: 1, displayId: 2, name: "Highway Fast Strobe", subtitle: "High-speed snappy dual strobe for attention", category: "Strobe", defaultSpeed: 8, steps: [[1,1],[0,0],[1,1],[0,0],[0,0],[0,0]] },
+      { id: 2, displayId: 3, name: "Dynamic Audi Sequential Flow", subtitle: "Progressive sweep simulating sequential signals", category: "OEM", defaultSpeed: 12, steps: [[0.3,0],[0.7,0.2],[1,0.5],[0.8,0.9],[0.2,1],[0,0.4],[0,0]] },
+      { id: 3, displayId: 4, name: "Hyper-Blinker 4X", subtitle: "Four rapid micro-bursts with cooling pause", category: "Strobe", defaultSpeed: 6, steps: [[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[0,0],[0,0]] },
+      { id: 4, displayId: 5, name: "Police Interceptor Quad", subtitle: "Tactical alternating quad strobe", category: "Emergency", defaultSpeed: 6, steps: [[1,0],[0,0],[1,0],[0,0],[1,0],[0,0],[1,0],[0,0],[0,1],[0,0],[0,1],[0,0],[0,1],[0,0],[0,1],[0,0]] },
+      { id: 5, displayId: 6, name: "F1 Safety Car Strobe", subtitle: "FIA-spec rain hazard flash cadence", category: "Emergency", defaultSpeed: 7, steps: [[1,1],[0,0],[1,1],[0,0],[0,0],[1,0],[0,1],[1,1],[0,0]] },
+      { id: 6, displayId: 7, name: "Mazda Heartbeat Pulse", subtitle: "Signature organic fading double-thump rhythm", category: "OEM", defaultSpeed: 14, steps: [[1,1],[0.6,0.6],[0.2,0.2],[0.9,0.9],[0.4,0.4],[0.1,0.1],[0,0],[0,0],[0,0]] },
+      { id: 7, displayId: 8, name: "Knight Rider Larson Scanner", subtitle: "Alternating ping-pong sweep with trailing decay", category: "Chase", defaultSpeed: 11, steps: [[1,0],[0.7,0.2],[0.4,0.5],[0.1,0.8],[0,1],[0.1,0.8],[0.4,0.5],[0.7,0.2]] },
+      { id: 8, displayId: 9, name: "Brake Pulsar Burst", subtitle: "Formula safety brake: 5 rapid alert pulses", category: "OEM", defaultSpeed: 7, steps: [[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[1,1],[1,1],[1,1]] },
+      { id: 9, displayId: 10, name: "Dual Alternate Strobe", subtitle: "Sharp left-right alternating wig-wag strobe", category: "Emergency", defaultSpeed: 12, steps: [[1,0],[1,0],[0,1],[0,1]] },
+      { id: 10, displayId: 11, name: "Breathing Beacon", subtitle: "Sinusoidal smooth breathing cycle", category: "Special", defaultSpeed: 18, steps: [[0.05,0.05],[0.2,0.2],[0.5,0.5],[0.8,0.8],[1,1],[0.85,0.85],[0.6,0.6],[0.3,0.3],[0.1,0.1],[0,0]] },
+      { id: 11, displayId: 12, name: "Triple Threat", subtitle: "Tri-pulse shockwave simultaneously firing", category: "Strobe", defaultSpeed: 8, steps: [[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[0,0],[0,0]] },
+      { id: 12, displayId: 13, name: "Emergency SOS Morse", subtitle: "International maritime SOS in light", category: "Emergency", defaultSpeed: 10, steps: [[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[0,0],[1,1],[1,1],[0,0],[1,1],[1,1],[0,0],[1,1],[1,1],[0,0],[0,0],[1,1],[0,0],[1,1],[0,0],[1,1],[0,0],[0,0],[0,0]] },
+      { id: 13, displayId: 14, name: "Random Riot Strobe", subtitle: "Chaotic pseudo-random flash cadence", category: "Strobe", defaultSpeed: 5, steps: [[1,0],[0,1],[1,1],[0,0],[0,1],[1,0],[0,0],[1,1],[0,0],[1,0]] },
+      { id: 14, displayId: 15, name: "Airport Runway Chase", subtitle: "Sequential approach lighting ripple", category: "Chase", defaultSpeed: 10, steps: [[0.2,0],[0.6,0.1],[1,0.4],[0.3,0.9],[0,1],[0,0.3],[0,0]] },
+      { id: 15, displayId: 16, name: "Ghost Flare", subtitle: "Creeps from darkness then flares to peak", category: "Special", defaultSpeed: 14, steps: [[0.05,0.05],[0.1,0.1],[0.2,0.2],[0.4,0.4],[0.7,0.7],[1,1],[0.1,0.1],[0,0]] },
+      { id: 16, displayId: 17, name: "Cyberpunk Glitch Flasher", subtitle: "Stutter pulses with asynchronous channel delay", category: "Special", defaultSpeed: 8, steps: [[1,0],[0,0],[1,1],[1,0],[0,1],[0,0],[0,1],[1,1],[0,0]] },
+      { id: 17, displayId: 18, name: "Rally Stage High-Vis", subtitle: "WRC night-stage asymmetric flash", category: "Strobe", defaultSpeed: 9, steps: [[1,1],[1,1],[0,0],[1,0],[0,1],[1,1],[0,0],[0,0]] },
+      { id: 18, displayId: 19, name: "Lowrider Cruise Pulse", subtitle: "Relaxed boulevard cruising rhythm", category: "OEM", defaultSpeed: 20, steps: [[0.8,0.8],[0.3,0.3],[0.9,0.9],[0.2,0.2],[0,0],[0,0]] },
+      { id: 19, displayId: 20, name: "Double Tap Hazard", subtitle: "Two crisp synchronous taps with pause", category: "OEM", defaultSpeed: 13, steps: [[1,1],[0,0],[1,1],[0,0],[0,0],[0,0],[0,0]] },
+      { id: 20, displayId: 21, name: "Caterpillar Crawl", subtitle: "Overlapping wave creating crawling illusion", category: "Chase", defaultSpeed: 11, steps: [[1,0],[0.8,0.4],[0.3,0.9],[0,1],[0.4,0.6],[0.9,0.2]] },
+      { id: 21, displayId: 22, name: "Supernova Burst", subtitle: "Escalating frequency culminating in strobe", category: "Special", defaultSpeed: 7, steps: [[0.3,0.3],[0,0],[0.5,0.5],[0,0],[0.8,0.8],[0,0],[1,1],[1,1],[0,0]] },
+      { id: 22, displayId: 23, name: "Metro Train Signal", subtitle: "Cadence modeled after railway crossing lights", category: "OEM", defaultSpeed: 18, steps: [[1,0],[1,0],[0,0],[0,1],[0,1],[0,0]] },
+      { id: 23, displayId: 24, name: "Thunderstorm Lightning", subtitle: "Irregular electrical discharge simulation", category: "Special", defaultSpeed: 6, steps: [[1,0.3],[0,0],[0.8,1],[0.2,0],[1,1],[0,0],[0,0],[0.3,0.7],[0,0]] },
+      { id: 24, displayId: 25, name: "Tachometer Redline Blink", subtitle: "Shift-light aggressive flutter on rpm redline", category: "Strobe", defaultSpeed: 4, steps: [[1,1],[0,0],[1,1],[0,0],[1,1],[0,0]] },
+      { id: 25, displayId: 26, name: "Stepped Staircase Level", subtitle: "3-tier stepped intensity progression", category: "Special", defaultSpeed: 15, steps: [[0.33,0.33],[0.66,0.66],[1,1],[0.66,0.66],[0.33,0.33],[0,0]] },
+      { id: 26, displayId: 27, name: "Ping-Pong Accelerando", subtitle: "Bounces at accelerating tempo", category: "Chase", defaultSpeed: 9, steps: [[1,0],[0,0],[0,1],[0,0],[1,0],[0,1],[1,0],[0,1]] },
+      { id: 27, displayId: 28, name: "Stealth Micro-Beacon", subtitle: "Ultra short needle pulse orientation marker", category: "Emergency", defaultSpeed: 24, steps: [[1,1],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]] },
+      { id: 28, displayId: 29, name: "Heartbeat Arrhythmia", subtitle: "Syncopated bio-rhythmic pulse", category: "Special", defaultSpeed: 13, steps: [[1,0.8],[0.4,0.3],[0,0],[0.8,1],[0.2,0.3],[0,0],[0.9,0.9],[0,0],[0,0]] },
+      { id: 29, displayId: 30, name: "Solid All-On / Worklight", subtitle: "100% continuous steady output for inspection", category: "OEM", defaultSpeed: 15, steps: [[1,1],[1,1],[1,1],[1,1]] }
+    ];
+
+    let activeMode = 6;
+    let activeSpeed = 14;
+    let modeSpeeds = PATTERNS.map(p => p.defaultSpeed);
+    let espIp = localStorage.getItem('wiflash_ip') || '192.168.4.1';
+    let debounceTimer = null;
+    let animInterval = null;
+    let animStep = 0;
+    let selectedCategory = 'ALL';
+    let searchQuery = '';
+
+    async function syncStatus() {
+      setHud("Menghubungkan ke http://" + espIp + "/status...", "info");
+      try {
+        const res = await fetch("http://" + espIp + "/status", { mode: 'cors' });
+        if (res.ok) {
+          const data = await res.json();
+          updateIpBadge(true);
+          if (Array.isArray(data.speeds) && data.speeds.length > 0) modeSpeeds = data.speeds;
+          if (typeof data.currentMode === 'number') activeMode = data.currentMode;
+          if (typeof data.speed === 'number') activeSpeed = data.speed;
+          else activeSpeed = modeSpeeds[activeMode] || 14;
+
+          renderCurrentPattern();
+          renderPatternGrid();
+          setHud("Terhubung! Mode #" + String(activeMode + 1).padStart(2, '0') + " aktif, Kecepatan: " + activeSpeed, "success");
+          return;
+        }
+      } catch (err) {
+        updateIpBadge(false);
+        setHud("ESP di " + espIp + " belum terjangkau. Simulator lokal aktif.", "info");
+      }
+      renderCurrentPattern();
+      renderPatternGrid();
+    }
+
+    async function sendMode(m) {
+      activeMode = m;
+      activeSpeed = modeSpeeds[m] || PATTERNS[m].defaultSpeed;
+      renderCurrentPattern();
+      renderPatternGrid();
+
+      setHud("Mengirim Mode #" + String(m + 1).padStart(2, '0') + " (GET /set?mode=" + m + ")...", "info");
+      try {
+        const res = await fetch("http://" + espIp + "/set?mode=" + m, { mode: 'cors' });
+        if (res.ok) {
+          updateIpBadge(true);
+          setHud("Mode #" + String(m + 1).padStart(2, '0') + " berhasil aktif di ESP!", "success");
+        }
+      } catch (e) {
+        setHud("Perintah diterapkan di simulator (ESP offline).", "info");
+      }
+    }
+
+    function applySpeed(v) {
+      const clamped = Math.max(4, Math.min(30, Math.round(v)));
+      activeSpeed = clamped;
+      modeSpeeds[activeMode] = clamped;
+      document.getElementById('speedSlider').value = clamped;
+      document.getElementById('speedBadge').innerText = clamped + " STEP";
+      restartVisualizer();
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        setHud("Mengirim Kecepatan " + clamped + " (GET /set?speed=" + clamped + ")...", "info");
+        try {
+          const res = await fetch("http://" + espIp + "/set?speed=" + clamped, { mode: 'cors' });
+          if (res.ok) {
+            updateIpBadge(true);
+            setHud("Kecepatan " + clamped + " tersimpan di ESP!", "success");
+          }
+        } catch (e) {
+          setHud("Kecepatan diubah di simulator.", "info");
+        }
+      }, 150);
+    }
+
+    async function resetFactory() {
+      if (!confirm("Reset semua 30 kecepatan mode ke pengaturan default pabrik?")) return;
+      setHud("Mengirim Reset Pabrik (GET /reset)...", "info");
+      try {
+        const res = await fetch("http://" + espIp + "/reset", { mode: 'cors' });
+        if (res.ok) {
+          setHud("ESP Berhasil Direset ke Pengaturan Pabrik!", "success");
+          setTimeout(syncStatus, 500);
+          return;
+        }
+      } catch (e) {
+        setHud("Reset diterapkan pada simulator.", "info");
+      }
+      modeSpeeds = PATTERNS.map(p => p.defaultSpeed);
+      activeSpeed = modeSpeeds[activeMode];
+      renderCurrentPattern();
+      renderPatternGrid();
+    }
+
+    function restartVisualizer() {
+      if (animInterval) clearInterval(animInterval);
+      const pattern = PATTERNS[activeMode] || PATTERNS[0];
+      const intervalMs = Math.max(35, Math.round(activeSpeed * 12));
+      const leftEl = document.getElementById('chLeft');
+      const rightEl = document.getElementById('chRight');
+      const eqBars = document.querySelectorAll('.eq-bar');
+
+      animInterval = setInterval(() => {
+        animStep = (animStep + 1) % pattern.steps.length;
+        const [l, r] = pattern.steps[animStep];
+        if (l > 0.1) leftEl.classList.add('active'); else leftEl.classList.remove('active');
+        if (r > 0.1) rightEl.classList.add('active'); else rightEl.classList.remove('active');
+        const activeLevel = Math.max(l, r);
+        eqBars.forEach(bar => {
+          if (activeLevel > 0.2) bar.classList.add('active'); else bar.classList.remove('active');
+        });
+      }, intervalMs);
+    }
+
+    function renderCurrentPattern() {
+      const p = PATTERNS[activeMode] || PATTERNS[0];
+      document.getElementById('profileName').innerText = p.name;
+      document.getElementById('profileDesc').innerText = p.subtitle;
+      document.getElementById('displayBadge').innerHTML = "#" + String(p.displayId).padStart(2, '0') + " <span style='color:#64748b;'>/ 30</span>";
+      document.getElementById('indexBadge').innerText = "mode=" + p.id;
+      document.getElementById('armedModeText').innerText = "ARMED (Mode #" + String(p.displayId).padStart(2, '0') + ")";
+      document.getElementById('speedSlider').value = activeSpeed;
+      document.getElementById('speedBadge').innerText = activeSpeed + " STEP";
+      restartVisualizer();
+    }
+
+    function renderPatternGrid() {
+      const grid = document.getElementById('patternGrid');
+      grid.innerHTML = '';
+      const filtered = PATTERNS.filter(p => {
+        const catMatch = selectedCategory === 'ALL' || p.category === selectedCategory;
+        const searchMatch = p.name.toLowerCase().includes(searchQuery) ||
+                            p.subtitle.toLowerCase().includes(searchQuery) ||
+                            String(p.displayId) === searchQuery;
+        return catMatch && searchMatch;
+      });
+
+      filtered.forEach(p => {
+        const isActive = p.id === activeMode;
+        const speedVal = modeSpeeds[p.id] || p.defaultSpeed;
+        const btn = document.createElement('button');
+        btn.className = "mode-btn" + (isActive ? " active" : "");
+        btn.onclick = () => sendMode(p.id);
+        btn.innerHTML = `
+          <div class="mode-id-badge">#${String(p.displayId).padStart(2, '0')}</div>
+          <div class="mode-info">
+            <div class="mode-name">${p.name}</div>
+            <div class="mode-sub">${p.subtitle}</div>
+            <div style="display:flex; gap:6px; margin-top:6px;">
+              <span style="font-size:0.58rem; padding:1px 5px; border-radius:4px; background:rgba(30,41,59,0.8);">${p.category}</span>
+              <span style="font-size:0.58rem; padding:1px 5px; border-radius:4px; background:rgba(245,158,11,0.15); color:var(--amber);">Speed: ${speedVal}</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(btn);
+      });
+    }
+
+    function filterCategory(cat) {
+      selectedCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(pill => {
+        if (pill.innerText === cat) pill.classList.add('active'); else pill.classList.remove('active');
+      });
+      renderPatternGrid();
+    }
+
+    function setHud(text, type) {
+      const banner = document.getElementById('hudBanner');
+      document.getElementById('hudText').innerText = text;
+      banner.className = "hud-banner " + (type || "info");
+    }
+
+    function updateIpBadge(online) {
+      const badge = document.getElementById('ipBadge');
+      document.getElementById('ipText').innerText = espIp;
+      badge.className = online ? "ip-badge" : "ip-badge offline";
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function saveSettings() {
+      const newIp = document.getElementById('targetIpInput').value.trim() || '192.168.4.1';
+      espIp = newIp;
+      localStorage.setItem('wiflash_ip', newIp);
+      closeModal('settingsModal');
+      syncStatus();
+    }
+
+    function testPing() {
+      const ip = document.getElementById('targetIpInput').value.trim() || '192.168.4.1';
+      fetch("http://" + ip + "/status", { mode: 'cors' })
+        .then(r => r.json())
+        .then(d => alert("Koneksi SUKSES ke " + ip + "!\nMode: #" + (d.currentMode + 1) + "\nSpeed: " + d.speed))
+        .catch(() => alert("Gagal menghubungi " + ip + "\nPastikan HP/Laptop sudah terhubung ke WiFi flasher."));
+    }
+
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered:', reg.scope))
+          .catch(err => console.warn('SW failed:', err));
+      });
+    }
+
+    // PWA Install Prompt
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('btnInstall');
+      if (btn) btn.style.display = 'flex';
+    });
+
+    document.getElementById('btnInstall').addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('btnInstall').style.display = 'none';
+        });
+      }
+    });
+
+    // Event Listeners
+    document.getElementById('speedSlider').addEventListener('input', (e) => applySpeed(e.target.value));
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase();
+      renderPatternGrid();
+    });
+    document.getElementById('btnResetFactory').addEventListener('click', resetFactory);
+    document.getElementById('btnRefresh').addEventListener('click', syncStatus);
+    document.getElementById('btnOpenSettings').addEventListener('click', () => {
+      document.getElementById('targetIpInput').value = espIp;
+      openModal('settingsModal');
+    });
+    document.getElementById('ipBadge').addEventListener('click', () => {
+      document.getElementById('targetIpInput').value = espIp;
+      openModal('settingsModal');
+    });
+
+    // Inisialisasi awal
+    syncStatus();
+  </script>
+</body>
+</html>
