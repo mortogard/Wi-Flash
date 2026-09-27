@@ -69,7 +69,6 @@
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
     }
 
-    /* Header */
     header {
       padding: 14px 18px;
       border-bottom: 1px solid rgba(30, 41, 59, 0.8);
@@ -172,7 +171,6 @@
       border-color: var(--amber);
     }
 
-    /* Transmission HUD Banner */
     .hud-banner {
       padding: 8px 16px;
       background: rgba(15, 23, 42, 0.7);
@@ -197,7 +195,6 @@
       border-bottom-color: rgba(239, 68, 68, 0.4);
     }
 
-    /* Main Container */
     main {
       padding: 16px;
       display: flex;
@@ -206,7 +203,6 @@
       flex: 1;
     }
 
-    /* Status Bar */
     .status-bar {
       display: flex;
       align-items: center;
@@ -259,7 +255,6 @@
       color: #f43f5e;
     }
 
-    /* Cards */
     .card {
       border-radius: 16px;
       border: 1px solid rgba(30, 41, 59, 0.8);
@@ -317,7 +312,6 @@
       line-height: 1.4;
     }
 
-    /* Realtime Visualizer */
     .visualizer-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -397,7 +391,6 @@
       margin-top: 10px;
     }
 
-    /* Slider Card */
     .slider-title-wrap {
       display: flex;
       align-items: center;
@@ -488,7 +481,6 @@
       box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
     }
 
-    /* Pattern Library */
     .filter-bar {
       display: flex;
       flex-direction: column;
@@ -511,7 +503,6 @@
       border-color: var(--amber);
     }
 
-    /* Filter Category Pills */
     .category-pills {
       display: flex;
       gap: 8px;
@@ -657,7 +648,6 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Footer */
     footer {
       padding: 14px 18px;
       border-top: 1px solid rgba(30, 41, 59, 0.8);
@@ -688,7 +678,6 @@
       text-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
     }
 
-    /* Modals */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -770,7 +759,6 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Header -->
     <header>
       <div class="brand-wrap">
         <div class="brand-logo">
@@ -799,15 +787,12 @@
       </div>
     </header>
 
-    <!-- Transmission HUD Banner -->
     <div id="hudBanner" class="hud-banner">
       <span id="hudText">Memeriksa status Modul Wi-Flash di http://192.168.4.1/status...</span>
       <button id="btnRefresh" style="background:none; border:none; color:inherit; cursor:pointer; font-size:0.85rem;" title="Muat Ulang Status">&#x21bb;</button>
     </div>
 
-    <!-- Main Controller -->
     <main>
-      <!-- Relay Status Bar -->
       <div class="status-bar">
         <div class="status-indicator">
           <div class="status-dot"></div>
@@ -822,7 +807,6 @@
         </button>
       </div>
 
-      <!-- Current Profile Card -->
       <div class="card card-profile">
         <div class="card-header">
           <div class="card-label">
@@ -838,7 +822,6 @@
         <div id="profileName" class="profile-title">Mazda Heartbeat Pulse</div>
         <div id="profileDesc" class="profile-desc">Detak organik bertahap dengan peluruhan kuadratik halus</div>
 
-        <!-- Realtime Dual Channel Visualizer -->
         <div class="visualizer-grid">
           <div class="channel-box-wrap">
             <div id="chLeft" class="channel-box">
@@ -875,7 +858,6 @@
         </div>
       </div>
 
-      <!-- Speed Slider Card -->
       <div class="card">
         <div class="slider-title-wrap">
           <div>
@@ -900,7 +882,6 @@
         </div>
       </div>
 
-      <!-- Pattern Library Card (30 Modes) -->
       <div class="card">
         <div class="card-header">
           <div class="card-label"><span id="patLibTitle">Daftar Mode Kedipan</span> (30 Mode)</div>
@@ -924,7 +905,6 @@
       </div>
     </main>
 
-    <!-- Footer: DEVELOPER: MORTOGARD (highlighted) & ©MORTOGARD Wi-Flash PRO -->
     <footer>
       <div class="footer-left">
         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--amber); box-shadow:0 0 8px var(--amber); animation: pulse 1.5s infinite;"></span>
@@ -937,7 +917,6 @@
     </footer>
   </div>
 
-  <!-- Settings Modal: Pengaturan Wi-Flash PRO -->
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
@@ -949,7 +928,6 @@
       </div>
 
       <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
-        <!-- Language Switcher -->
         <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:12px; background:rgba(15,23,42,0.6); border:1px solid #1e293b;">
           <div>
             <div id="langLabel" style="font-weight:700; color:#fff;">Bahasa Antarmuka</div>
@@ -961,14 +939,12 @@
           </div>
         </div>
 
-        <!-- Current Wi-Fi Credentials & Change Wi-Fi -->
         <div style="padding:14px; border-radius:14px; border:1px solid rgba(245,158,11,0.3); background:linear-gradient(135deg, rgba(18,24,41,0.9), rgba(10,13,22,0.9));">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
             <span id="currentWifiTitle" style="color:var(--amber); font-weight:700; font-family:'Chakra Petch',sans-serif; text-transform:uppercase;">Informasi Wi-Fi Saat Ini</span>
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:#34d399; background:rgba(16,185,129,0.1); padding:2px 8px; border-radius:9999px; border:1px solid rgba(16,185,129,0.3);">SoftAP Aktif</span>
           </div>
 
-          <!-- Display Current SSID & Password with Eye Icon -->
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
             <div style="padding:10px; border-radius:8px; background:rgba(7,9,14,0.8); border:1px solid #1e293b;">
               <span id="ssidLabel" style="display:block; font-size:0.65rem; text-transform:uppercase; color:#94a3b8; font-weight:700;">SSID Wi-Fi Saat Ini</span>
@@ -986,7 +962,6 @@
             </div>
           </div>
 
-          <!-- Form Ubah Wi-Fi -->
           <div style="border-top:1px solid #1e293b; padding-top:12px;">
             <span id="changeWifiTitle" style="display:block; font-size:0.72rem; font-weight:700; color:#e2e8f0; margin-bottom:8px;">Ubah Pengaturan Wi-Fi</span>
             
@@ -1009,7 +984,6 @@
           </div>
         </div>
 
-        <!-- Modem-Sleep UI Frame (Auto-Off Wi-Fi) -->
         <div style="padding:12px; border-radius:12px; background:rgba(15,23,42,0.5); border:1px solid #1e293b;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
             <div style="display:flex; align-items:center; gap:6px;">
@@ -1045,7 +1019,6 @@
           <div id="sleepFeedback" style="display:none; margin-top:8px; padding:7px 10px; border-radius:8px; font-size:0.68rem; font-family:'JetBrains Mono',monospace; line-height:1.4;"></div>
         </div>
 
-        <!-- IP Target Input -->
         <div style="padding:12px; border-radius:12px; background:rgba(15,23,42,0.5); border:1px solid #1e293b;">
           <label id="ipInputLabel" style="display:block; margin-bottom:6px; font-weight:700; color:#e2e8f0;">Alamat IP Modul Wi-Flash:</label>
           <div style="display:flex; gap:8px;">
@@ -1057,7 +1030,6 @@
           <p id="ipNoteText" style="font-size:0.68rem; color:#64748b; margin-top:6px;">Standar SoftAP Modul Wi-Flash adalah <strong>192.168.4.1</strong>.</p>
         </div>
 
-        <!-- Bottom Close Button -->
         <div style="display:flex; justify-content:flex-end; gap:8px;">
           <button onclick="closeModal('settingsModal')" style="padding:10px 18px; border-radius:10px; background:rgba(30,41,59,0.8); color:#cbd5e1; border:1px solid #334155; font-weight:700; cursor:pointer;">
             <span id="btnCloseModalLabel">Tutup</span>
@@ -1071,9 +1043,6 @@
   </div>
 
   <script>
-    // =========================================================================
-    // 30 POLA KEDIPAN PERSIS SESUAI FIRMWARE MODUL WI-FLASH (CASE 0 SAMPAI 29)
-    // =========================================================================
     const PATTERNS = [
       { id: 0, displayId: 1, name: "Standar Hazard Blink", subtitle: "Kedipan standar 50% duty cycle simetris", category: "OEM", defaultSpeed: 12, steps: [[1, 1], [1, 1], [0, 0], [0, 0]] },
       { id: 1, displayId: 2, name: "Mazda Heartbeat Pulse", subtitle: "Detak organik bertahap dengan peluruhan kuadratik halus", category: "OEM", defaultSpeed: 12, steps: [[0.3, 0.3], [1.0, 1.0], [1.0, 1.0], [0.75, 0.75], [0.45, 0.45], [0.2, 0.2], [0.05, 0.05], [0, 0], [0, 0]] },
@@ -1107,9 +1076,6 @@
       { id: 29, displayId: 30, name: "Tri-Staccato Rhythm", subtitle: "3 ketukan staccato dengan jeda bertingkat", category: "Strobe", defaultSpeed: 12, steps: [[1, 1], [0, 0], [1, 1], [0, 0], [0, 0], [1, 1], [0, 0], [0, 0], [0, 0]] }
     ];
 
-    // =========================================================================
-    // KAMUS BAHASA (INDONESIA / ENGLISH)
-    // =========================================================================
     const I18N = {
       id: {
         profileCardTitle: 'PROFIL AKTIF',
@@ -1117,7 +1083,6 @@
         rightLightLabel: 'Lampu Kanan',
         syncLabel: 'Kedipan Lampu',
         speedCardTitle: 'Kecepatan Kedipan',
-        speedCardSub: 'Rentang Firmware: 4 (Cepat) – 30 (Lambat)',
         speedBadgeSuffix: 'LANGKAH',
         markerFast: 'CEPAT (4)',
         markerMid: 'SEDANG (17)',
@@ -1171,7 +1136,6 @@
         rightLightLabel: 'Right Light',
         syncLabel: 'Flash Rhythm',
         speedCardTitle: 'Flashing Speed',
-        speedCardSub: 'Firmware Range: 4 (Fast) – 30 (Slow)',
         speedBadgeSuffix: 'STEPS',
         markerFast: 'FAST (4)',
         markerMid: 'MID (17)',
@@ -1221,11 +1185,8 @@
       }
     };
 
-    // =========================================================================
-    // STATE APLIKASI
-    // =========================================================================
     let currentLanguage = localStorage.getItem('wiflash_lang') || 'id';
-    let currentModeId = 1; // Default Mode 1 (Mazda Heartbeat Pulse)
+    let currentModeId = 1;
     let currentSpeed = 12;
     let modeSpeeds = new Array(30).fill(12);
     let targetIp = localStorage.getItem('wiflash_esp_ip') || '192.168.4.1';
@@ -1235,8 +1196,9 @@
     let activeCategory = 'ALL';
     let visualizerTimer = null;
     let visualizerStep = 0;
+    let isSleepOn = false;
+    let sleepMinutes = 3;
 
-    // Apply language texts
     function applyLanguage(lang) {
       currentLanguage = lang;
       localStorage.setItem('wiflash_lang', lang);
@@ -1247,8 +1209,6 @@
       document.getElementById('rightLightLabel').innerText = dict.rightLightLabel;
       document.getElementById('syncLabel').innerText = dict.syncLabel;
       document.getElementById('speedCardTitle').innerText = dict.speedCardTitle;
-      const speedCardSubEl = document.getElementById('speedCardSub');
-      if (speedCardSubEl) speedCardSubEl.innerHTML = dict.speedCardSub;
       document.getElementById('speedBadge').innerText = currentSpeed + ' ' + dict.speedBadgeSuffix;
       document.getElementById('markerFast').innerText = dict.markerFast;
       document.getElementById('markerMid').innerText = dict.markerMid;
@@ -1272,6 +1232,7 @@
       document.getElementById('newPassInput').placeholder = dict.newPassPlaceholder;
       document.getElementById('btnSaveWifiLabel').innerText = dict.btnSaveWifiLabel;
       document.getElementById('btnResetWifiLabel').innerText = dict.btnResetWifiLabel;
+      
       if (document.getElementById('sleepFrameTitle')) {
         document.getElementById('sleepFrameTitle').innerText = dict.sleepFrameTitle;
         document.getElementById('sleepDescText').innerText = dict.sleepDescText;
@@ -1283,6 +1244,7 @@
         document.getElementById('sleepMaxMarker').innerText = '10 ' + dict.minuteUnit;
         updateSleepToggleUI();
       }
+      
       document.getElementById('ipInputLabel').innerText = dict.ipInputLabel;
       document.getElementById('btnPingLabel').innerText = dict.btnPingLabel;
       document.getElementById('ipNoteText').innerHTML = dict.ipNoteText;
@@ -1290,7 +1252,6 @@
       document.getElementById('btnSaveIpLabel').innerText = dict.btnSaveIpLabel;
       document.getElementById('devPrefix').innerText = dict.devPrefix;
 
-      // Update button toggle style
       if (lang === 'id') {
         document.getElementById('btnLangId').style.background = 'var(--amber)';
         document.getElementById('btnLangId').style.color = '#07090e';
@@ -1390,7 +1351,6 @@
       renderPatternGrid();
     });
 
-    // Start Visualizer
     function startVisualizer() {
       if (visualizerTimer) clearInterval(visualizerTimer);
       const pattern = PATTERNS.find(p => p.id === currentModeId) || PATTERNS[1];
@@ -1431,7 +1391,6 @@
       const p = PATTERNS.find(x => x.id === modeId) || PATTERNS[1];
       currentSpeed = modeSpeeds[modeId] || p.defaultSpeed;
 
-      // Update Active Card
       document.getElementById('profileName').innerText = p.name;
       document.getElementById('profileDesc').innerText = p.subtitle;
       document.getElementById('displayBadge').innerHTML = `#${p.displayId.toString().padStart(2, '0')} <span style="color:#64748b;">/ 30</span>`;
@@ -1444,7 +1403,6 @@
       renderPatternGrid();
       startVisualizer();
 
-      // Send to Modul Wi-Flash
       setHud(`Mengirim Mode #${p.displayId.toString().padStart(2, '0')} Ke MODUL...`, 'normal');
       fetch(`http://${targetIp}/set?mode=${modeId}`, { mode: 'cors' })
         .then(res => {
@@ -1487,7 +1445,6 @@
       applySpeed(Number(e.target.value));
     });
 
-    // Reset Pabrik
     document.getElementById('btnResetFactory').addEventListener('click', () => {
       const dict = I18N[currentLanguage];
       if (confirm(dict.confirmFactoryReset)) {
@@ -1506,7 +1463,6 @@
       }
     });
 
-    // Wi-Fi Configuration
     function saveNewWifi() {
       const dict = I18N[currentLanguage];
       const s = document.getElementById('newSsidInput').value.trim();
@@ -1596,6 +1552,22 @@
           if (typeof data.speed === 'number') {
             currentSpeed = data.speed;
           }
+
+          // Sinkronisasi status Modem-Sleep asli dari memori EEPROM ESP-12F
+          if (typeof data.sleepEnabled === 'boolean') {
+            isSleepOn = data.sleepEnabled;
+            localStorage.setItem('wiflash_sleep_enabled', isSleepOn ? '1' : '0');
+            updateSleepToggleUI();
+          }
+          if (typeof data.sleepMinutes === 'number') {
+            sleepMinutes = data.sleepMinutes;
+            localStorage.setItem('wiflash_sleep_minutes', sleepMinutes.toString());
+            const badge = document.getElementById('sleepMinutesBadge');
+            if (badge) badge.innerText = sleepMinutes + ' ' + (dict.minuteUnit || 'Menit');
+            const range = document.getElementById('sleepRangeInput');
+            if (range) range.value = sleepMinutes;
+          }
+
           selectMode(currentModeId);
           setHud(`✅ ${dict.statusConnected}${(currentModeId + 1).toString().padStart(2, '0')}, Speed ${currentSpeed}`, 'success');
           document.getElementById('ipBadge').classList.remove('offline');
@@ -1606,10 +1578,6 @@
           selectMode(currentModeId);
         });
     }
-
-    // Modem-Sleep state (Default: OFF, 3 Menit)
-    let isSleepOn = false;
-    let sleepMinutes = 3;
 
     function toggleSleepMode() {
       isSleepOn = !isSleepOn;
@@ -1723,12 +1691,10 @@
 
     document.getElementById('btnRefresh').addEventListener('click', syncStatus);
 
-    // Inisialisasi
     document.getElementById('ipText').innerText = targetIp;
     document.getElementById('currentSsidDisplay').innerText = currentSsid;
     document.getElementById('currentPassDisplay').innerText = showPasswordState ? currentPassword : '••••••••';
 
-    // Inisialisasi Modem-Sleep (Default: OFF, 3 Menit)
     const savedSleepEn = localStorage.getItem('wiflash_sleep_enabled');
     isSleepOn = (savedSleepEn === '1');
     const savedSleepMin = localStorage.getItem('wiflash_sleep_minutes');
